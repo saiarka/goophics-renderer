@@ -1,7 +1,9 @@
 package main
 
 import (
+	"./utils"
 	"fmt"
+	"os"
 )
 
 var IMAGE_HEIGHT int = 400
@@ -14,6 +16,7 @@ func main() {
 	fmt.Print("255\n")
 
 	for i := 0; i < IMAGE_HEIGHT; i++ {
+		fmt.Fprint(os.Stderr, "Scanlines Remaining: ", IMAGE_HEIGHT-i, "\n")
 		for j := 0; j < IMAGE_WIDTH; j++ {
 			var bounded_r float64 = float64(i) / float64(IMAGE_HEIGHT)
 			var bounded_g float64 = float64(j) / float64(IMAGE_WIDTH)
