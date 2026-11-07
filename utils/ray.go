@@ -2,6 +2,12 @@ package utils
 
 type Point3 = Vec3
 
+func NewPoint3(e1, e2, e3 float64) Vec3 {
+	return Vec3{
+		e: [3]float64{e1, e2, e3},
+	}
+}
+
 type Ray struct {
 	origin    Point3
 	direction Vec3
