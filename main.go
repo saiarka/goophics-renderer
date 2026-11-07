@@ -1,8 +1,8 @@
 package main
 
 import (
-	"./utils"
 	"fmt"
+	utils "github.com/saiarka/goophics-renderer/utils"
 	"os"
 )
 
@@ -18,15 +18,8 @@ func main() {
 	for i := 0; i < IMAGE_HEIGHT; i++ {
 		fmt.Fprint(os.Stderr, "Scanlines Remaining: ", IMAGE_HEIGHT-i, "\n")
 		for j := 0; j < IMAGE_WIDTH; j++ {
-			var bounded_r float64 = float64(i) / float64(IMAGE_HEIGHT)
-			var bounded_g float64 = float64(j) / float64(IMAGE_WIDTH)
-			var bounded_b float64 = 0
-
-			r := int(bounded_r * 255.99)
-			g := int(bounded_g * 255.99)
-			b := int(bounded_b * 255.99)
-
-			fmt.Print(r, " ", g, " ", b, "\n")
+			pixel_color := utils.NewColor(float64(i)/float64(IMAGE_HEIGHT), float64(j)/float64(IMAGE_WIDTH), 0)
+			utils.WriteColor(pixel_color)
 		}
 	}
 
