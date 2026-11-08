@@ -10,7 +10,11 @@ var IMAGE_WIDTH int = 400
 var ASPECT_RATIO float64 = 16.0 / 9.0
 
 func RayColor(r utils.Ray) utils.Color {
-	return utils.NewColor(210, 0, 0)
+	unit_direction := r.Direction().UnitVector()
+	a := (unit_direction.GetVec3Y() + 1.0) * 0.5
+	color_1_portion := utils.NewColor(1.0, 1.0, 1.0).MultiplyNewScalar(1.0 - a)
+	color_2_portion := utils.NewColor(0.5, 0.7, 1.0).MultiplyNewScalar(a)
+	return color_1_portion.AddNewVec3(color_2_portion)
 }
 
 func main() {
