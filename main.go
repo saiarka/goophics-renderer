@@ -17,6 +17,20 @@ func RayColor(r utils.Ray) utils.Color {
 	return color_1_portion.AddNewVec3(color_2_portion)
 }
 
+// SPHERE//
+var SPHERE_COLOR utils.Color = utils.NewColor(255, 0, 0)
+
+func HitSphere(radius float64, center utils.Point3, r utils.Ray) bool {
+	center_to_point := center.SubtractNewVec3(r.Origin())
+	a := r.Direction().DotProduct(r.Direction())
+	b := r.Direction().DotProduct(center_to_point) * -2
+	c := center_to_point.DotProduct(center_to_point) - (radius * radius)
+	discriminant := (b * b) - (4 * a * c)
+	return discriminant >= 0
+}
+
+//SPHERE//
+
 func main() {
 
 	IMAGE_HEIGHT := int(float64(IMAGE_WIDTH) / ASPECT_RATIO)
@@ -50,8 +64,12 @@ func main() {
 			ray_direction := pixel_center.SubtractNewVec3(camera_center)
 			var r utils.Ray = utils.NewRay(camera_center, ray_direction)
 
-			var pixel_color utils.Color = RayColor(r)
-			utils.WriteColor(pixel_color)
+			if HitSphere(0.5, utils.NewPoint3(0, 0, -1), r) {
+				utils.WriteColor(SPHERE_COLOR)
+			} else {
+				var pixel_color utils.Color = RayColor(r)
+				utils.WriteColor(pixel_color)
+			}
 		}
 	}
 
