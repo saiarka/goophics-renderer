@@ -3,10 +3,11 @@ package main
 import (
 	"fmt"
 	utils "github.com/saiarka/goophics-renderer/utils"
+	"math"
 	"os"
 )
 
-var IMAGE_WIDTH int = 400
+var IMAGE_WIDTH int = 800
 var ASPECT_RATIO float64 = 16.0 / 9.0
 
 func RayColor(r utils.Ray) utils.Color {
@@ -19,14 +20,22 @@ func RayColor(r utils.Ray) utils.Color {
 
 // SPHERE//
 var SPHERE_COLOR utils.Color = utils.NewColor(255, 0, 0)
+var SPHERE_LOCATION utils.Point3 = utils.NewPoint3(0, 0, -1)
 
-func HitSphere(radius float64, center utils.Point3, r utils.Ray) bool {
+const NOT_HIT = -1
+
+func HitSphere(radius float64, center utils.Point3, r utils.Ray) float64 {
 	center_to_point := center.SubtractNewVec3(r.Origin())
 	a := r.Direction().DotProduct(r.Direction())
 	b := r.Direction().DotProduct(center_to_point) * -2
 	c := center_to_point.DotProduct(center_to_point) - (radius * radius)
 	discriminant := (b * b) - (4 * a * c)
-	return discriminant >= 0
+
+	if discriminant < 0 {
+		return NOT_HIT
+	} else {
+		return (-b - math.Sqrt(discriminant)) / (2.0 * a)
+	}
 }
 
 //SPHERE//
@@ -64,11 +73,12 @@ func main() {
 			ray_direction := pixel_center.SubtractNewVec3(camera_center)
 			var r utils.Ray = utils.NewRay(camera_center, ray_direction)
 
-			if HitSphere(0.5, utils.NewPoint3(0, 0, -1), r) {
-				utils.WriteColor(SPHERE_COLOR)
-			} else {
+			if sphere_hit_loc := HitSphere(0.5, SPHERE_LOCATION, r); sphere_hit_loc == NOT_HIT {
 				var pixel_color utils.Color = RayColor(r)
 				utils.WriteColor(pixel_color)
+			} else {
+				var normal utils.Vec3 = r.At(sphere_hit_loc).SubtractNewVec3(SPHERE_LOCATION).UnitVector()
+				utils.WriteColor(utils.NewColor(normal.GetVec3X()+1, normal.GetVec3Y()+1, normal.GetVec3Z()+1).MultiplyNewScalar(0.5))
 			}
 		}
 	}
