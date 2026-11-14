@@ -39,13 +39,13 @@ func (v Vec3) Print() {
 }
 
 // PRIVATE
-func (v Vec3) length_squared() float64 {
+func (v Vec3) LengthSquared() float64 {
 	return v.e[0]*v.e[0] + v.e[1]*v.e[1] + v.e[2]*v.e[2]
 }
 
 // PRIVATE
 func (v Vec3) length() float64 {
-	return math.Sqrt(v.length_squared())
+	return math.Sqrt(v.LengthSquared())
 }
 
 func (v1 Vec3) AddNewVec3(v2 Vec3) Vec3 {

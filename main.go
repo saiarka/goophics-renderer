@@ -26,15 +26,15 @@ const NOT_HIT = -1
 
 func HitSphere(radius float64, center utils.Point3, r utils.Ray) float64 {
 	center_to_point := center.SubtractNewVec3(r.Origin())
-	a := r.Direction().DotProduct(r.Direction())
-	b := r.Direction().DotProduct(center_to_point) * -2
-	c := center_to_point.DotProduct(center_to_point) - (radius * radius)
-	discriminant := (b * b) - (4 * a * c)
+	a := r.Direction().LengthSquared()
+	h := r.Direction().DotProduct(center_to_point)
+	c := center_to_point.LengthSquared() - (radius * radius)
+	discriminant := (h * h) - (a * c)
 
 	if discriminant < 0 {
 		return NOT_HIT
 	} else {
-		return (-b - math.Sqrt(discriminant)) / (2.0 * a)
+		return (h - math.Sqrt(discriminant)) / (a)
 	}
 }
 
