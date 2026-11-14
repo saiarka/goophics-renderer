@@ -1,4 +1,4 @@
-package utils
+package main
 
 type Point3 = Vec3
 
