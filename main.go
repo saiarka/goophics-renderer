@@ -8,7 +8,18 @@ import (
 var IMAGE_WIDTH int = 800
 var ASPECT_RATIO float64 = 16.0 / 9.0
 
-func RayColor(r Ray) Color {
+func RayColor(r Ray, world HittableList) Color {
+	h_rec := HitRecord{
+		NewPoint3(0, 0, 0),
+		NewVec3(0, 0, 0),
+		0,
+		false,
+	}
+
+	if world.CheckHit(r, 0, POS_INFINITY, &h_rec) {
+		return h_rec.normal.AddNewVec3(NewColor(1, 1, 1)).MultiplyNewScalar(0.5)
+	}
+
 	unit_direction := r.Direction().UnitVector()
 	a := (unit_direction.GetVec3Y() + 1.0) * 0.5
 	color_1_portion := NewColor(1.0, 1.0, 1.0).MultiplyNewScalar(1.0 - a)
@@ -45,10 +56,15 @@ func main() {
 	fmt.Print(IMAGE_WIDTH, " ", IMAGE_HEIGHT, "\n")
 	fmt.Print("255\n")
 
-	s := Sphere{
+	world := HittableList{}
+	world.Add(Sphere{
 		SPHERE_LOCATION,
 		0.5,
-	}
+	})
+	world.Add(Sphere{
+		NewPoint3(0, -100.5, -1),
+		100,
+	})
 
 	for i := range IMAGE_HEIGHT {
 		fmt.Fprint(os.Stderr, "Scanlines Remaining: ", IMAGE_HEIGHT-i, "\n")
@@ -57,18 +73,9 @@ func main() {
 			ray_direction := pixel_center.SubtractNewVec3(camera_center)
 			var r Ray = NewRay(camera_center, ray_direction)
 
-			h_rec := HitRecord{
-				NewPoint3(0, 0, 0),
-				NewVec3(0, 0, 0),
-				0,
-				false,
-			}
-			if check_hit := s.CheckHit(r, -1000, 1000, &h_rec); check_hit == IS_HIT {
-				WriteColor(NewColor(h_rec.normal.GetVec3X()+1, h_rec.normal.GetVec3Y()+1, h_rec.normal.GetVec3Z()+1).MultiplyNewScalar(0.5))
-			} else {
-				var pixel_color Color = RayColor(r)
-				WriteColor(pixel_color)
-			}
+			var pixel_color Color = RayColor(r, world)
+			WriteColor(pixel_color)
+
 		}
 	}
 

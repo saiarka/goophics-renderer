@@ -32,7 +32,7 @@ func (s Sphere) CheckHit(r Ray, t_min float64, t_max float64, hit_record *HitRec
 
 	hit_record.point = r.At(t)
 	hit_record.normal = hit_record.point.SubtractNewVec3(s.location).UnitVector()
-	hit_record.is_front_face = hit_record.normal.DotProduct(r.direction) > 0
+	hit_record.is_front_face = hit_record.normal.DotProduct(r.direction) < 0
 	if !hit_record.is_front_face {
 		hit_record.normal.MultiplyScalar(-1)
 	}
