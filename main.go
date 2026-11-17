@@ -61,6 +61,7 @@ func main() {
 				NewPoint3(0, 0, 0),
 				NewVec3(0, 0, 0),
 				0,
+				false,
 			}
 			if check_hit := s.CheckHit(r, -1000, 1000, &h_rec); check_hit == IS_HIT {
 				WriteColor(NewColor(h_rec.normal.GetVec3X()+1, h_rec.normal.GetVec3Y()+1, h_rec.normal.GetVec3Z()+1).MultiplyNewScalar(0.5))

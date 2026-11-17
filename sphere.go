@@ -11,7 +11,7 @@ type Sphere struct {
 	radius   float64
 }
 
-func (s Sphere) CheckHit(r Ray, t_min float64, t_max float64, hit_record *HitRecord) bool {
+func (s Sphere) CheckHit(r Ray, t_min float64, t_max float64, hit_record *HitRecord) (is_hit bool) {
 	center_to_point := s.location.SubtractNewVec3(r.Origin())
 	a := r.Direction().LengthSquared()
 	h := r.Direction().DotProduct(center_to_point)
@@ -32,6 +32,10 @@ func (s Sphere) CheckHit(r Ray, t_min float64, t_max float64, hit_record *HitRec
 
 	hit_record.point = r.At(t)
 	hit_record.normal = hit_record.point.SubtractNewVec3(s.location).UnitVector()
+	hit_record.is_front_face = hit_record.normal.DotProduct(r.direction) > 0
+	if !hit_record.is_front_face {
+		hit_record.normal.MultiplyScalar(-1)
+	}
 	hit_record.t = t
 
 	return IS_HIT
