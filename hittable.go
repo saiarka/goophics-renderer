@@ -15,7 +15,7 @@ type HitRecord struct {
 }
 
 type Hittable interface {
-	CheckHit(r Ray, t_min float64, t_max float64, hit_record *HitRecord) (is_hit bool)
+	CheckHit(r Ray, i Interval, hit_record *HitRecord) (is_hit bool)
 }
 
 // HITTABLE INTERFACE //

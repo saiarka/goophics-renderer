@@ -16,7 +16,14 @@ func RayColor(r Ray, world HittableList) Color {
 		false,
 	}
 
-	if world.CheckHit(r, 0, POS_INFINITY, &h_rec) {
+	i := Interval{
+		0,
+		POS_INFINITY,
+		false,
+		false,
+	}
+
+	if world.CheckHit(r, i, &h_rec) {
 		return h_rec.normal.AddNewVec3(NewColor(1, 1, 1)).MultiplyNewScalar(0.5)
 	}
 
