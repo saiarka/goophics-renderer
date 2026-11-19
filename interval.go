@@ -46,3 +46,7 @@ func (i *Interval) SetInterval(min float64, max float64, is_min_inclusive bool, 
 	i.is_min_inclusive = is_min_inclusive
 	i.is_max_inclusive = is_max_inclusive
 }
+
+func (i *Interval) Size() (size float64) {
+	return i.max - i.min
+}
