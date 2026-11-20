@@ -50,6 +50,7 @@ func NewCamera(camera_opts ...CameraOption) Camera {
 	return c
 }
 
+// TODO: We should consider moving ViewportConfig related code to a seperate file
 type ViewportConfig struct {
 	pixel_00_loc  Point3
 	pixel_delta_u Vec3
@@ -110,4 +111,32 @@ func (c *Camera) Render(world HittableList) {
 		}
 	}
 
+}
+
+func (c *Camera) RenderWithAA(world HittableList, samples int) {
+	vc := c.getViewportConfig()
+
+	for i := range IMAGE_HEIGHT {
+		fmt.Fprint(os.Stderr, "Scanlines Remaining: ", IMAGE_HEIGHT-i, "\n")
+		for j := range IMAGE_WIDTH {
+			var pixel_center Point3 = vc.pixel_00_loc.AddNewVec3(vc.pixel_delta_u.MultiplyNewScalar(float64(j))).AddNewVec3(vc.pixel_delta_v.MultiplyNewScalar(float64(i)))
+			var accumulation Color = NewColor(0, 0, 0)
+			for range samples {
+				random_x, err := RandomFloat64(-vc.pixel_delta_u.length()/2, vc.pixel_delta_u.length()/2)
+				if err != nil {
+					fmt.Print(err)
+				}
+				random_y, err := RandomFloat64(-vc.pixel_delta_v.length()/2, vc.pixel_delta_v.length()/2)
+				if err != nil {
+					fmt.Print(err)
+				}
+				var sample_point Point3 = pixel_center.AddNewVec3(NewVec3(random_x, random_y, 0))
+				ray_direction := sample_point.SubtractNewVec3(c.camera_center)
+				var r Ray = NewRay(c.camera_center, ray_direction)
+				accumulation.AddVec3(rayColor(r, world))
+			}
+			accumulation.DivideScalar(float64(samples))
+			WriteColor(accumulation)
+		}
+	}
 }

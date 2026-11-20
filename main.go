@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 )
 
@@ -15,6 +16,13 @@ func main() {
 
 	//NOTE: Leaving this here bc I forgot why I had it in the first place
 	// IMAGE_WIDTH = max(1, IMAGE_WIDTH)
+
+	// Flags for rendering configuration
+	// SUPPORTS:
+	// AA (Antialiasing)
+	antialiasing_enabled := flag.Bool("aa", false, "bool flag to enable antialiasing")
+
+	flag.Parse()
 
 	camera := NewCamera()
 
@@ -32,6 +40,10 @@ func main() {
 		100,
 	})
 
-	camera.Render(world)
+	if *antialiasing_enabled {
+		camera.RenderWithAA(world, 4)
+	} else {
+		camera.Render(world)
+	}
 
 }
