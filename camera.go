@@ -85,7 +85,23 @@ func rayColor(r Ray, world HittableList) Color {
 	}
 
 	if world.CheckHit(r, NewInterval(0, POS_INFINITY, false, false), &h_rec) {
-		return h_rec.normal.AddNewVec3(NewColor(1, 1, 1)).MultiplyNewScalar(0.5)
+		// TODO: Below is a coloring method using normals
+		// We want to specify rendering styles depending on material of the object eventually
+		// return h_rec.normal.AddNewVec3(NewColor(1, 1, 1)).MultiplyNewScalar(0.5)
+
+		// SPHERE DIFFUSE MATERIAL NAIVE //
+
+		//Generates random point3 in sphere
+
+		//Creates vector from sphere origin to point3
+
+		//Checks if in correct hemisphere by comparing to normal --> If not, then retry w/ new
+		// point3
+
+		//Recursive check on new random ray, with respective altered attenuation factor
+
+		// SPHERE DIFFUSE MATERIAL NAIVE //
+
 	}
 
 	unit_direction := r.Direction().UnitVector()
