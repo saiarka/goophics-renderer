@@ -76,144 +76,55 @@ func (c *Camera) getViewportConfig() ViewportConfig {
 
 }
 
-func rayColor(r Ray, world HittableList) Color {
-	h_rec := HitRecord{
-		nil,
-		NewPoint3(0, 0, 0),
-		NewVec3(0, 0, 0),
-		0,
-		false,
-	}
+func (c *Camera) Render(world HittableList, renderer *Renderer) {
+	vc := c.getViewportConfig()
 
-	if world.CheckHit(r, NewInterval(0, POS_INFINITY, false, false), &h_rec) {
-		return h_rec.normal.AddNewVec3(NewColor(1, 1, 1)).MultiplyNewScalar(0.5)
-	}
-
-	unit_direction := r.Direction().UnitVector()
-	a := (unit_direction.GetVec3Y() + 1.0) * 0.5
-	color_1_portion := NewColor(1.0, 1.0, 1.0).MultiplyNewScalar(1.0 - a)
-	color_2_portion := NewColor(0.5, 0.7, 1.0).MultiplyNewScalar(a)
-	return color_1_portion.AddNewVec3(color_2_portion)
-}
-
-func rayColorDiffuse(r Ray, world HittableList, attenuation float64) Color { //TODO: Replace with RenderConfiguration
-	h_rec := HitRecord{
-		nil,
-		NewPoint3(0, 0, 0),
-		NewVec3(0, 0, 0),
-		0,
-		false,
-	}
-
-	if world.CheckHit(r, NewInterval(0, POS_INFINITY, false, false), &h_rec) {
-		// TODO: Below is a coloring method using normals
-		// We want to specify rendering styles depending on material of the object eventually
-		// return h_rec.normal.AddNewVec3(NewColor(1, 1, 1)).MultiplyNewScalar(0.5)
-
-		switch (*h_rec.object_ptr).(type) {
-		case Sphere:
-			//Generates random point3 in sphere
-			//Check if length of vector squared overflows
-			dir := GenerateRandomSpherePoint(
-				Interval{
-					-1,
-					1,
-					true,
-					true,
-				},
-				Interval{
-					-1,
-					1,
-					true,
-					true,
-				},
-				Interval{
-					-1,
-					1,
-					true,
-					true,
-				},
-			)
-			//Creates vector from sphere origin to point3
-			// dir := random_point.SubtractNewVec3(obj.location)
-			//Checks if in correct hemisphere by comparing to normal --> If not, then reverse
-			if hemisphere_check := dir.DotProduct(h_rec.normal); hemisphere_check <= 0 {
-				dir = dir.GetInverse()
+	if renderer.aa_config.enabled {
+		for i := range IMAGE_HEIGHT {
+			fmt.Fprint(os.Stderr, "Scanlines Remaining: ", IMAGE_HEIGHT-i, "\n")
+			for j := range IMAGE_WIDTH {
+				var pixel_center Point3 = vc.pixel_00_loc.AddNewVec3(vc.pixel_delta_u.MultiplyNewScalar(float64(j))).AddNewVec3(vc.pixel_delta_v.MultiplyNewScalar(float64(i)))
+				var accumulation Color = NewColor(0, 0, 0)
+				for range renderer.aa_config.sample_size {
+					random_x, err := RandomFloat64(-vc.pixel_delta_u.length()/2, vc.pixel_delta_u.length()/2)
+					if err != nil {
+						fmt.Print(err)
+					}
+					random_y, err := RandomFloat64(-vc.pixel_delta_v.length()/2, vc.pixel_delta_v.length()/2)
+					if err != nil {
+						fmt.Print(err)
+					}
+					var sample_point Point3 = pixel_center.AddNewVec3(NewVec3(random_x, random_y, 0))
+					ray_direction := sample_point.SubtractNewVec3(c.camera_center)
+					var r Ray = NewRay(c.camera_center, ray_direction)
+					if renderer.diffuse_config.enabled {
+						accumulation.AddVec3(rayColorDiffuse(r, world, renderer.diffuse_config.attenuation))
+					} else {
+						accumulation.AddVec3(rayColor(r, world))
+					}
+				}
+				accumulation.DivideScalar(float64(renderer.aa_config.sample_size))
+				WriteColor(accumulation)
 			}
-			//Recursive check on new random ray, with respective altered attenuation factor
-			return rayColorDiffuse(NewRay(h_rec.point, dir), world, attenuation).MultiplyNewScalar(attenuation)
-			// return h_rec.normal.AddNewVec3(NewColor(1, 1, 1)).MultiplyNewScalar(0.5)
 		}
-
-	}
-
-	unit_direction := r.Direction().UnitVector()
-	a := (unit_direction.GetVec3Y() + 1.0) * 0.5
-	color_1_portion := NewColor(1.0, 1.0, 1.0).MultiplyNewScalar(1.0 - a)
-	color_2_portion := NewColor(0.5, 0.7, 1.0).MultiplyNewScalar(a)
-	return color_1_portion.AddNewVec3(color_2_portion)
-}
-
-func (c *Camera) Render(world HittableList) {
-	vc := c.getViewportConfig()
-
-	for i := range IMAGE_HEIGHT {
-		fmt.Fprint(os.Stderr, "Scanlines Remaining: ", IMAGE_HEIGHT-i, "\n")
-		for j := range IMAGE_WIDTH {
-			var pixel_center Point3 = vc.pixel_00_loc.AddNewVec3(vc.pixel_delta_u.MultiplyNewScalar(float64(j))).AddNewVec3(vc.pixel_delta_v.MultiplyNewScalar(float64(i)))
-			ray_direction := pixel_center.SubtractNewVec3(c.camera_center)
-			var r Ray = NewRay(c.camera_center, ray_direction)
-
-			var pixel_color Color = rayColor(r, world)
-			WriteColor(pixel_color)
-
-		}
-	}
-
-}
-
-func (c *Camera) RenderDiffuse(world HittableList) {
-	vc := c.getViewportConfig()
-
-	for i := range IMAGE_HEIGHT {
-		fmt.Fprint(os.Stderr, "Scanlines Remaining: ", IMAGE_HEIGHT-i, "\n")
-		for j := range IMAGE_WIDTH {
-			var pixel_center Point3 = vc.pixel_00_loc.AddNewVec3(vc.pixel_delta_u.MultiplyNewScalar(float64(j))).AddNewVec3(vc.pixel_delta_v.MultiplyNewScalar(float64(i)))
-			ray_direction := pixel_center.SubtractNewVec3(c.camera_center)
-			var r Ray = NewRay(c.camera_center, ray_direction)
-
-			var pixel_color Color = rayColorDiffuse(r, world, 0.5)
-			WriteColor(pixel_color)
-
-		}
-	}
-
-}
-
-func (c *Camera) RenderWithAA(world HittableList, samples int) { //TODO: Remove and replace with RenderConfiguration
-	vc := c.getViewportConfig()
-
-	for i := range IMAGE_HEIGHT {
-		fmt.Fprint(os.Stderr, "Scanlines Remaining: ", IMAGE_HEIGHT-i, "\n")
-		for j := range IMAGE_WIDTH {
-			var pixel_center Point3 = vc.pixel_00_loc.AddNewVec3(vc.pixel_delta_u.MultiplyNewScalar(float64(j))).AddNewVec3(vc.pixel_delta_v.MultiplyNewScalar(float64(i)))
-			var accumulation Color = NewColor(0, 0, 0)
-			for range samples {
-				random_x, err := RandomFloat64(-vc.pixel_delta_u.length()/2, vc.pixel_delta_u.length()/2)
-				if err != nil {
-					fmt.Print(err)
-				}
-				random_y, err := RandomFloat64(-vc.pixel_delta_v.length()/2, vc.pixel_delta_v.length()/2)
-				if err != nil {
-					fmt.Print(err)
-				}
-				var sample_point Point3 = pixel_center.AddNewVec3(NewVec3(random_x, random_y, 0))
-				ray_direction := sample_point.SubtractNewVec3(c.camera_center)
+	} else {
+		for i := range IMAGE_HEIGHT {
+			fmt.Fprint(os.Stderr, "Scanlines Remaining: ", IMAGE_HEIGHT-i, "\n")
+			for j := range IMAGE_WIDTH {
+				var pixel_center Point3 = vc.pixel_00_loc.AddNewVec3(vc.pixel_delta_u.MultiplyNewScalar(float64(j))).AddNewVec3(vc.pixel_delta_v.MultiplyNewScalar(float64(i)))
+				ray_direction := pixel_center.SubtractNewVec3(c.camera_center)
 				var r Ray = NewRay(c.camera_center, ray_direction)
-				accumulation.AddVec3(rayColor(r, world))
+
+				var pixel_color Color
+				if renderer.diffuse_config.enabled {
+					pixel_color = rayColorDiffuse(r, world, renderer.diffuse_config.attenuation)
+				} else {
+					pixel_color = rayColor(r, world)
+				}
+				WriteColor(pixel_color)
+
 			}
-			accumulation.DivideScalar(float64(samples))
-			WriteColor(accumulation)
 		}
 	}
+
 }

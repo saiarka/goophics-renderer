@@ -40,10 +40,18 @@ func main() {
 		100,
 	})
 
-	if *antialiasing_enabled {
-		camera.RenderWithAA(world, 4)
-	} else {
-		camera.RenderDiffuse(world)
+	renderer := Renderer{
+		aa_config: AntialiasConfig{
+			sample_size: 4,
+			enabled:     *antialiasing_enabled,
+		},
+		diffuse_config: DiffuseConfig{
+			attenuation:  0.5,
+			distribution: "uniform",
+			enabled:      true,
+		},
 	}
+
+	camera.Render(world, &renderer)
 
 }
