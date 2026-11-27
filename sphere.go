@@ -41,4 +41,14 @@ func (s Sphere) CheckHit(r Ray, i Interval, hit_record *HitRecord) (is_hit bool)
 	return IS_HIT
 }
 
+func GenerateRandomSpherePoint(x_int Interval, y_int Interval, z_int Interval) Point3 {
+	for {
+		random_point := RandomPoint3(x_int, y_int, z_int)
+		len_squared := random_point.LengthSquared()
+		if len_squared > 1e-160 && len_squared < 1 {
+			return random_point.UnitVector()
+		}
+	}
+}
+
 //SPHERE//

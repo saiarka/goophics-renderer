@@ -43,7 +43,7 @@ func main() {
 	if *antialiasing_enabled {
 		camera.RenderWithAA(world, 4)
 	} else {
-		camera.Render(world)
+		camera.RenderDiffuse(world)
 	}
 
 }

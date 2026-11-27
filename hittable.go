@@ -8,6 +8,7 @@ const (
 )
 
 type HitRecord struct {
+	object_ptr    *Hittable
 	point         Point3
 	normal        Vec3
 	t             float64

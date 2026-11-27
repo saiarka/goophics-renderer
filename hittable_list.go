@@ -13,6 +13,7 @@ func (h_list *HittableList) Add(h Hittable) {
 func (h_list HittableList) CheckHit(r Ray, i Interval, hit_record *HitRecord) (is_hit bool) {
 
 	temp_rec := HitRecord{
+		nil,
 		NewPoint3(0, 0, 0),
 		NewVec3(0, 0, 0),
 		0,
@@ -25,6 +26,7 @@ func (h_list HittableList) CheckHit(r Ray, i Interval, hit_record *HitRecord) (i
 		if object.CheckHit(r, i, &temp_rec) {
 			hit_anything = true
 			i.max = temp_rec.t
+			temp_rec.object_ptr = &object
 			*hit_record = temp_rec
 		}
 	}
