@@ -98,7 +98,7 @@ func (c *Camera) Render(world HittableList, renderer *Renderer) {
 					ray_direction := sample_point.SubtractNewVec3(c.camera_center)
 					var r Ray = NewRay(c.camera_center, ray_direction)
 					if renderer.diffuse_config.enabled {
-						accumulation.AddVec3(rayColorDiffuse(r, world, renderer.diffuse_config.attenuation))
+						accumulation.AddVec3(rayColorDiffuse(r, world, renderer.diffuse_config.attenuation, renderer.diffuse_config.recursive_depth))
 					} else {
 						accumulation.AddVec3(rayColor(r, world))
 					}
@@ -117,7 +117,7 @@ func (c *Camera) Render(world HittableList, renderer *Renderer) {
 
 				var pixel_color Color
 				if renderer.diffuse_config.enabled {
-					pixel_color = rayColorDiffuse(r, world, renderer.diffuse_config.attenuation)
+					pixel_color = rayColorDiffuse(r, world, renderer.diffuse_config.attenuation, renderer.diffuse_config.recursive_depth)
 				} else {
 					pixel_color = rayColor(r, world)
 				}

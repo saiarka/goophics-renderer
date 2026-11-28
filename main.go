@@ -42,13 +42,14 @@ func main() {
 
 	renderer := Renderer{
 		aa_config: AntialiasConfig{
-			sample_size: 4,
+			sample_size: 10,
 			enabled:     *antialiasing_enabled,
 		},
 		diffuse_config: DiffuseConfig{
-			attenuation:  0.5,
-			distribution: "uniform",
-			enabled:      true,
+			attenuation:     0.5,
+			distribution:    "uniform",
+			enabled:         true,
+			recursive_depth: 10,
 		},
 	}
 

@@ -14,9 +14,10 @@ type AntialiasConfig struct {
 }
 
 type DiffuseConfig struct {
-	attenuation  float64
-	distribution string //TODO: maybe?
-	enabled      bool
+	attenuation     float64
+	distribution    string //TODO: maybe?
+	recursive_depth int
+	enabled         bool
 }
 
 func rayColor(r Ray, world HittableList) Color {
@@ -39,7 +40,12 @@ func rayColor(r Ray, world HittableList) Color {
 	return color_1_portion.AddNewVec3(color_2_portion)
 }
 
-func rayColorDiffuse(r Ray, world HittableList, attenuation float64) Color {
+func rayColorDiffuse(r Ray, world HittableList, attenuation float64, recursive_depth int) Color {
+
+	if recursive_depth <= 0 {
+		return NewColor(0, 0, 0)
+	}
+
 	h_rec := HitRecord{
 		nil,
 		NewPoint3(0, 0, 0),
@@ -74,7 +80,7 @@ func rayColorDiffuse(r Ray, world HittableList, attenuation float64) Color {
 			if hemisphere_check := dir.DotProduct(h_rec.normal); hemisphere_check <= 0 {
 				dir = dir.GetInverse()
 			}
-			return rayColorDiffuse(NewRay(h_rec.point, dir), world, attenuation).MultiplyNewScalar(attenuation)
+			return rayColorDiffuse(NewRay(h_rec.point, dir), world, attenuation, recursive_depth-1).MultiplyNewScalar(attenuation)
 		}
 	}
 	unit_direction := r.Direction().UnitVector()
